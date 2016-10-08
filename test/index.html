@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>demo</title>
+	</head>
+	<body  style="background: #eee;">
+		<canvas id="yun"  width="600px" height="600px" style="border:1px solid #ddd;"></canvas>
+		
+		<script>
+			var c = document.getElementById("yun");
+			var ctx= c.getContext("2d");
+			
+			ctx.fillStyle="#fff";
+			ctx.fillRect(0,0,600,600); 
+			
+			
+			ParamEllipse(ctx,300,90,100,30)
+			ctx.font="30px Arial";
+			ctx.fillStyle="#000";
+			ctx.textAlign="center"; 
+			ctx.fillText("挂电话",300,100);
+			
+			function ParamEllipse(context, x, y, a, b){
+			   var step = (a > b) ? 1 / a : 1 / b;
+			   context.fillStyle ="#e6d54f"
+			   context.beginPath();
+			   context.moveTo(x + a, y);
+			   for (var i = 0; i < 2 * Math.PI; i += step){
+			      context.lineTo(x + a * Math.cos(i), y + b * Math.sin(i));
+			   }
+			   context.fill()
+			   context.closePath();
+			   
+			   context.stroke();
+			};
+			
+		</script>
+	</body>
+</html>
