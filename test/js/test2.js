@@ -3,22 +3,22 @@ window.addEventListener("load",function(){
 	
 	var winW = document.body.clientWidth ;
 	
-	var maxWidth = 1000 ; // 默认宽度
-	var marginX = 20 ;
-	var marginY = 120 ;
-	var marginToP = 50 ;
-	var fontSize = 30 ;
-	var fontWidth = 15;
-	var pointMargin = 30 ;
-	var piceOneHeight = fontSize + 30 + marginToP ; 
+	var maxWidth = 1000 ; // 默认canvas宽度
+	var marginX = 20 ; // 标签横间距
+	var marginY = 120 ; // 标签竖间距
+	var marginToP = 50 ; // 单元竖向 间距
+	var fontSize = 30 ; // 字体大小
+	var fontWidth = 15;  // 每个字符对应宽度
+	var pointMargin = 30 ; // 标签内部填充
+	var piceOneHeight = fontSize + 30 + marginToP ; //标签高度
 	
 	
 	function getTreaPoint(data){ // 获取数据对应关系，确定每条数据对应的点和其父级的点
 		
 		var hash = {
-			tree : {},
-			readyId : [],
-			headId : []
+			tree : {}, // 记录点的信息
+			readyId : [], // 记录完成的点
+			headId : [] // 记录顶点
 		}
 		
 		function getPartPoint(){
@@ -40,10 +40,12 @@ window.addEventListener("load",function(){
 				}
 				if(_parentId==""){ // 顶元素
 					var thisPoint = hash.tree[_id] || point ;
+					thisPoint.heightAdded = false;
+					//console.log(_id,thisPoint.height,piceOneHeight)
 					thisPoint.left = maxWidth/2 ;
 					thisPoint.top = marginToP ;
 					var t_index = hash.headId.indexOf(_id) ;
-					if(t_index!=-1){ 
+					if(t_index!=-1){
 						var prevHeight =0, prevTop = 0 ;
 						if(t_index!=0){
 							prevHeight = hash.tree[hash.headId[t_index-1]].height ;
@@ -59,7 +61,7 @@ window.addEventListener("load",function(){
 					var parent = getTreePoint(_parentId);
 					if(parent){
 						if(parent.sonIds.indexOf(_id)==-1){parent.sonIds.push(_id)};
-						point.top = parent.top + marginToP ;
+						point.top = parent.top + marginToP + 30 ;
 						
 						addParentHeight(point);
 						addParentWidth(point);
@@ -80,11 +82,12 @@ window.addEventListener("load",function(){
 				drawTree(hash);
 			}
 			
-			function getTreePoint(id){ // 获取父级节点
+			function getTreePoint(id){ // 获取节点
 				return hash.tree[id] || null ;
 			}
 			
 			function addParentHeight(point){ // 成长父级高度
+				console.log(point.id,point.parentId)
 				if(point.parentId){
 					var parentPoint = hash.tree[point.parentId] ;
 					if(!parentPoint.heightAdded){
@@ -108,7 +111,7 @@ window.addEventListener("load",function(){
 					
 					for(var i=0;i< pointParent.sonIds.length;i++){
 						var id = pointParent.sonIds[i]
-						console.log(point.id,pointParent.sonIds,id)
+						//console.log(point.id,pointParent.sonIds,id)
 						//console.log(hash.tree[id])
 					}
 					
