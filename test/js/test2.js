@@ -4,7 +4,7 @@ window.addEventListener("load",function(){
 	var winW = document.body.clientWidth ;
 	
 	var maxWidth = 1000 ; // 默认canvas宽度
-	var marginX = 20 ; // 标签横间距
+	var marginX = 60 ; // 标签横间距
 	var marginY = 120 ; // 标签竖间距
 	var marginToP = 50 ; // 单元竖向 间距
 	var fontSize = 30 ; // 字体大小
@@ -56,38 +56,80 @@ window.addEventListener("load",function(){
 						hash.headId.push(_id) // 记录顶点
 					}
 					hash.tree[_id] = thisPoint ;
+					reCumTrees();
 					hash.readyId.push(_id) // 此点完成
 				}else{ // 非顶点
-					var parent = getTreePoint(_parentId);
+					var thisPoint = hash.tree[_id] || point ;
+					var parent = hash.tree[_parentId];
+					console.log(thisPoint.id ,parent)
 					if(parent){
 						if(parent.sonIds.indexOf(_id)==-1){parent.sonIds.push(_id)};
-						point.top = parent.top + marginToP + 30 ;
 						
-						addParentHeight(point);
-						addParentWidth(point);
+						thisPoint.top = parent.top + marginToP + 30 ;
+						thisPoint.left = getThisLeft(thisPoint);
+						hash.tree[_id] = thisPoint ;
 						
-						hash.tree[_id] = point ;
+						addParentHeight(thisPoint);
+						addParentWidth(thisPoint);
+						reCumTrees();
 						
-						point.left = getThisLeft(point);
 						hash.readyId.push(_id) // 此点完成
+					}else{
+						
 					}
 				}
 			})
 			
 			
-			if(!testAllPointReady()){ 
-				getPartPoint();
-			}else {
-				//console.log(hash)
-				drawTree(hash);
+			
+			
+			function reCumTrees(){ // 向下计算子元素
+				for(var i =0;i< hash.headId.length;i++){
+					getSonsPoint(hash.tree[hash.headId[i]]);
+				}
+				
+				function getSonsPoint(point){ // 计算子标签left、heigth ;
+					//console.log(point.id,hash.headId.indexOf(point.id))
+						
+						var middle = point.left ;
+						var top = point.top ;
+						var width = point.width;
+						
+						if(point.sonIds.length==1){
+							///console.log(startLeft,middle)
+						}
+						
+						var sonW = 0 ;
+						for(var k = 0; k< point.sonIds.length;k++){
+							sonW += hash.tree[ point.sonIds[k] ].width + (k==0?0:marginX) ;
+						}
+						//console.log(point,sonW,width)
+						if(sonW<width){
+							width = sonW ;
+						}
+						
+						var startLeft =  middle - ( width / 2 ) ;
+						
+						for(var j = 0; j< point.sonIds.length;j++){
+							var thisW = hash.tree[ point.sonIds[j] ].width;
+
+							hash.tree[ point.sonIds[j] ].left = startLeft +  thisW/2 ;
+							hash.tree[ point.sonIds[j] ].top = top + piceOneHeight ;
+							startLeft += hash.tree[ point.sonIds[j] ].width + marginX;
+							//console.log(top,hash.tree[ point.sonIds[j] ].top)
+								
+						}
+					
+					
+					for(var i = 0; i< point.sonIds.length;i++){
+						getSonsPoint(hash.tree[point.sonIds[i]]);	
+					}
+				}
 			}
 			
-			function getTreePoint(id){ // 获取节点
-				return hash.tree[id] || null ;
-			}
 			
-			function addParentHeight(point){ // 成长父级高度
-				console.log(point.id,point.parentId)
+			function addParentHeight(point){ // 向上成长父级高度
+				//console.log(point.id,point.parentId)
 				if(point.parentId){
 					var parentPoint = hash.tree[point.parentId] ;
 					if(!parentPoint.heightAdded){
@@ -102,24 +144,34 @@ window.addEventListener("load",function(){
 				//console.log(point)
 				
 				return 500;
-				
 			}
 			
-			function addParentWidth(point){  // 成长父级宽度
+			function addParentWidth(point){  // 向上成长父级宽度
 				if(point&&point.parentId){
 					var pointParent = hash.tree[point.parentId] ;
-					
+					//console.log(pointParent)
+					var width = 0 ;
+					//console.log(point.id,"to:",pointParent.id)
 					for(var i=0;i< pointParent.sonIds.length;i++){
-						var id = pointParent.sonIds[i]
-						//console.log(point.id,pointParent.sonIds,id)
-						//console.log(hash.tree[id])
+						var id = pointParent.sonIds[i];
+						//console.log(hash.tree[id].width)
+						width += hash.tree[id].width + ( i==0?0:marginX ) ;
 					}
-					
+					//console.log(pointParent.id,pointParent.width,width)
+					if(pointParent.width<width){
+						pointParent.width = width ;
+					}
+					//console.log(pointParent.id,pointParent.width)
 					addParentWidth(hash.tree[pointParent.parentId]);
 				}
 			}
 			
-			
+			if(!testAllPointReady()){ 
+				getPartPoint();
+			}else {
+				//console.log(hash)
+				drawTree(hash);
+			}
 		}
 		
 		function testAllPointReady(){  // 确认所有点计算完毕
@@ -142,7 +194,7 @@ window.addEventListener("load",function(){
 	
 	
 	function  drawTree(hash){ // 开始绘制
-		//console.log(hash)
+		console.log(hash)
 		var lastPointId = hash.headId[hash.headId.length-1] ;
 		
 		var offsetH = hash.tree[lastPointId].top + hash.tree[lastPointId].height ;
