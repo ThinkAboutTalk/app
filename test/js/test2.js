@@ -4,13 +4,13 @@ window.addEventListener("load",function(){
 	var winW = document.body.clientWidth ;
 	
 	var maxWidth = 1000 ; // 默认canvas宽度
-	var marginX = 60 ; // 标签横间距
+	var marginX = 20 ; // 标签横间距
 	var marginY = 120 ; // 标签竖间距
-	var marginToP = 50 ; // 单元竖向 间距
-	var fontSize = 30 ; // 字体大小
-	var fontWidth = 15;  // 每个字符对应宽度
-	var pointMargin = 30 ; // 标签内部填充
-	var piceOneHeight = fontSize + 30 + marginToP ; //标签高度
+	var marginToP = 200 ; // 单元竖向 间距
+	var fontSize = 60 ; // 字体大小
+	var fontWidth = 60;  // 每个字符对应宽度
+	var pointMargin = 60 ; // 标签内部填充
+	var piceOneHeight = fontSize + 60 + marginY ; //标签高度
 	
 	
 	function getTreaPoint(data){ // 获取数据对应关系，确定每条数据对应的点和其父级的点
@@ -32,6 +32,7 @@ window.addEventListener("load",function(){
 						title : _title,
 						left : 0 ,
 						top : 0 ,
+						parentAbout : value['log'] ,
 						width : _title.length * fontWidth + pointMargin ,
 						height : piceOneHeight ,
 						parentId : _parentId ,
@@ -50,8 +51,8 @@ window.addEventListener("load",function(){
 						if(t_index!=0){
 							prevHeight = hash.tree[hash.headId[t_index-1]].height ;
 							prevTop = hash.tree[hash.headId[t_index-1]].top ;
+							thisPoint.top = prevHeight + prevTop ;
 						}
-						thisPoint.top = marginToP + prevHeight + prevTop ;
 					}else{
 						hash.headId.push(_id) // 记录顶点
 					}
@@ -60,12 +61,13 @@ window.addEventListener("load",function(){
 					hash.readyId.push(_id) // 此点完成
 				}else{ // 非顶点
 					var thisPoint = hash.tree[_id] || point ;
+					thisPoint.heightAdded = false;
 					var parent = hash.tree[_parentId];
-					console.log(thisPoint.id ,parent)
+					//console.log(thisPoint.id ,parent)
 					if(parent){
 						if(parent.sonIds.indexOf(_id)==-1){parent.sonIds.push(_id)};
 						
-						thisPoint.top = parent.top + marginToP + 30 ;
+						thisPoint.top = parent.top + marginX + 30 ;
 						thisPoint.left = getThisLeft(thisPoint);
 						hash.tree[_id] = thisPoint ;
 						
@@ -190,7 +192,47 @@ window.addEventListener("load",function(){
 	}
 	
 	
-	
+	function Line(x1,y1,x2,y2){
+            this.x1=x1;
+            this.y1=y1;
+            this.x2=x2;
+            this.y2=y2;
+    }
+    Line.prototype.drawWithArrowheads=function(ctx){
+
+        // arbitrary styling
+        ctx.strokeStyle="#999";
+        ctx.fillStyle="#333";
+        ctx.lineWidth=1;
+        
+        // draw the line
+        ctx.beginPath();
+        ctx.moveTo(this.x1,this.y1);
+        ctx.lineTo(this.x2,this.y2);
+        ctx.stroke();
+
+        // draw the starting arrowhead
+//      var startRadians=Math.atan((this.y2-this.y1)/(this.x2-this.x1));
+//      startRadians+=((this.x2>this.x1)?-90:90)*Math.PI/180;
+//      this.drawArrowhead(ctx,this.x1,this.y1,startRadians);
+        // draw the ending arrowhead
+        var endRadians=Math.atan((this.y2-this.y1)/(this.x2-this.x1));
+        endRadians+=((this.x2>=this.x1)?90:-90)*Math.PI/180;
+        this.drawArrowhead(ctx,this.x2,this.y2,endRadians);
+
+    }
+    Line.prototype.drawArrowhead=function(ctx,x,y,radians){
+        ctx.save();
+        ctx.beginPath();
+        ctx.translate(x,y);
+        ctx.rotate(radians);
+        ctx.moveTo(0,0);
+        ctx.lineTo(3,10);
+        ctx.lineTo(-3,10);
+        ctx.closePath();
+        ctx.restore();
+        ctx.fill();
+    }
 	
 	
 	function  drawTree(hash){ // 开始绘制
@@ -206,17 +248,78 @@ window.addEventListener("load",function(){
 		ctx.fillStyle="#fff";
 		ctx.fillRect(0,0,1000,offsetH); 
 		
+		//字符
 		for(point in hash.tree){
 			//console.log(22222,hash.tree[point])
 			writeText(hash.tree[point])
 		}
 		
-		function writeText(point){
-			ctx.font="30px Arial";
+		// 关系线
+		for(point in hash.tree){
+			//console.log(22222,hash.tree[point])
+			drawLines(hash.tree[hash.tree[point].parentId] ,hash.tree[point])
+		}
+		
+		//关系节点说明
+		for(point in hash.tree){
+			//console.log(22222,hash.tree[point])
+			pointAbout(hash.tree[hash.tree[point].parentId] ,hash.tree[point])
+		}
+		
+		
+		function writeText(point,font){
+			ctx.font= font || fontSize + "px Arial";
 			ctx.fillStyle="#000";
 			ctx.textAlign="center";
 			ctx.fillText(point.title,point.left,point.top);
 		}
+		
+		function drawLines(pointparent,pointson){
+			if(!pointparent){return false;}
+			ctx.beginPath();
+  			ctx.lineCap = "round";
+     		ctx.lineWidth= 2;
+     		ctx.strokeStyle="#F00";
+     		ctx.moveTo(pointparent.left,pointparent.top+pointMargin/3);
+			ctx.lineTo(pointparent.left,pointparent.top+pointMargin/4*3);
+			ctx.stroke();
+			ctx.beginPath();
+			ctx.moveTo(pointparent.left,pointparent.top+pointMargin/4*3);
+			ctx.strokeStyle="#000";
+			ctx.lineTo(pointson.left,pointparent.top+pointMargin/4*3);
+			ctx.stroke();
+			
+			var line=new Line(pointson.left,pointparent.top+pointMargin/4*3,pointson.left,pointson.top-pointMargin/3*4);
+		    line.drawWithArrowheads(ctx);
+		}
+		
+		function pointAbout(pointparent,pointson){
+			if(!pointparent){return false;}
+			var prevL=pointparent.left;
+			var prevT= pointparent.top+pointMargin/2 // pointparent.top;
+			
+			var nextL= pointson.left 
+			var nextT= pointson.top - pointMargin/2//pointson.top
+			
+		    // create a new line objectx
+		    var aboutPoint = {
+		    	title : pointson.parentAbout ,
+		    	left : nextL ,// Math.abs(prevL - nextL )/2+ (prevL >nextL ?  nextL : prevL)   ,
+		    	top : nextT - piceOneHeight/2.4 // Math.abs(prevT - nextT )  +  prevT-piceOneHeight / 2,
+		    }
+		    //ctx.fillRect()="#000";
+		    
+		    var fillW = aboutPoint.title.length?aboutPoint.title.length*10 + 20 :0
+		    
+		    ctx.fillStyle="#f1f1f1";  //填充的颜色
+			ctx.strokeStyle="#ddd";  //边框颜色
+			ctx.linewidth=10;  //边框宽
+			ctx.fillRect(aboutPoint.left-fillW/2,aboutPoint.top-25,fillW,40);  //填充颜色 x y坐标 宽 高
+			ctx.strokeRect(aboutPoint.left-fillW/2,aboutPoint.top-25,fillW,40) //填充边框 x y坐标 宽 高
+		    
+			writeText(aboutPoint,"20px Arial");	
+		}
+		
 		
 	}
 	
@@ -224,6 +327,9 @@ window.addEventListener("load",function(){
 	
 	getTreaPoint(testJson); // 开始计算各个点
 	
+	
+	
+
 })
 
 
