@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html ng-app="drawwordsModule">
+	<head>
+		<meta charset="utf-8" />
+		<title>demo</title>
+		<link type="text/css" rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css"  />
+	</head>
+	<body ng-controller="demoCtrl">
+		
+		<div class="jumbotron masthead">
+	      <div class="container">
+	        <h1>展示demo</h1>
+	        <h2>向文本区域输入json以展示</h2>
+	      </div>
+	    </div>
+	    
+	    <div class="container projects">
+	    	<div class="row">
+	    		<div class="col-md-6">
+	    			
+	    			<textarea class="form-control" rows="30" ng-model="modelData" placeholder="//仅支持输入JSON格式数据"></textarea>
+	    			
+	    		</div>
+	    		<div class="col-md-6">
+	    			
+    				<div id="wrodsstart" style="overflow:hidden;overflow-y: auto;height:618px;border:1px solid #ddd;border-radius: .25rem;">
+						<canvas id="yun"  width="1000px" style=""></canvas>
+					</div>
+	    			
+	    		</div>
+	    	</div>
+	    </div>
+	    
+		
+		<script type="text/javascript" src="http://cdn.bootcss.com/angular.js/1.5.8/angular.min.js"></script>
+		<script type="text/javascript" src="js/drawwords.js"></script>
+		<script type="text/javascript">
+			var module = angular.module("drawwordsModule",[]);
+			module.controller("demoCtrl",["$scope",function($scope){
+				$scope.modelData = "" ;
+				$scope.$watch("modelData",function(newV,oldV,scope){
+					if(newV){
+						
+						drawWords(document.getElementById("yun"),document.getElementById("wrodsstart"),JSON.parse(newV));
+					}
+					
+				})
+				
+			}])
+			
+		</script>
+		
+	</body>
+</html>
