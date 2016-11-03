@@ -73,7 +73,7 @@ function drawWords(canvasObj,parentObj,jsonData){
 						if(parent.sonIds.indexOf(_id)==-1){parent.sonIds.push(_id)};
 						
 						thisPoint.top = parent.top + marginX + 30 ;
-						thisPoint.left = getThisLeft(thisPoint);
+						thisPoint.left = 0;
 						hash.tree[_id] = thisPoint ;
 						
 						addParentHeight(thisPoint);
@@ -97,6 +97,10 @@ function drawWords(canvasObj,parentObj,jsonData){
 				
 				function getSonsPoint(point){ // 计算子标签left、heigth ;
 					//console.log(point.id,hash.headId.indexOf(point.id))
+					
+					point.sonIds.sort(function(a,b){
+						return a - b ;
+					})
 						
 						var middle = point.left ;
 						var top = point.top ;
@@ -360,8 +364,20 @@ function drawWords(canvasObj,parentObj,jsonData){
 	
 	canvasObj.style.width = winW + "px" ;
 	
-	getTreaPoint(jsonData); // 开始计算各个点
-
+	
+	function sortDatas(data,id){
+		
+		
+		data.sort(function(a,b){
+			var num_a = a[id] - 0 ;
+			var num_b = b[id] - 0 ;
+			return  num_a - num_b ;
+		})
+		
+		return data ;
+	}
+	
+	getTreaPoint(sortDatas(jsonData,"idNo")); // 开始计算各个点
 }
 
 
