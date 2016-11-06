@@ -4,6 +4,7 @@
 		<meta charset="utf-8" />
 		<title>demo</title>
 		<link type="text/css" rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css"  />
+		<link type="text/css" rel="stylesheet" href="css/prism.css"  />
 	</head>
 	<body ng-controller="demoCtrl">
 		
@@ -31,21 +32,43 @@
 	    	</div>
 	    </div>
 	    
+	    <div class="container projects">
+	    	<div class="row">
+	    		<div class="col-md-12">
+	    			<pre ><code id="output"  class="language-javascript">
+	    			</code></pre>
+	    		</div>
+	    	</div>
+	    </div>
+	    
 		
 		<script type="text/javascript" src="http://cdn.bootcss.com/angular.js/1.5.8/angular.min.js"></script>
 		<script type="text/javascript" src="js/drawwords.js"></script>
+		<script src="js/prism.js" ></script>
 		<script type="text/javascript">
+		
 			var module = angular.module("drawwordsModule",[]);
 			module.controller("demoCtrl",["$scope",function($scope){
 				$scope.modelData = "" ;
+
 				$scope.$watch("modelData",function(newV,oldV,scope){
 					if(newV){
-						
 						drawWords(document.getElementById("yun"),document.getElementById("wrodsstart"),JSON.parse(newV));
+						var output = "NO.=144261 \n" 
+	    				output +="W_C=生命 \n"
+	    				output +="G_C=noun [sheng1 ming4] \n" 
+	    				output +="S_C= \n" 
+	    				output +="E_C= \n" 
+	    				output +="W_E=lives \n" 
+	    				output +="G_E=noun [2 lives■noun■-s■static■条		] \n" 
+	    				output +="S_E= \n" 
+	    				output +="E_E= \n" 
+	    				output +="DEF={Life|生命:RelateTo={phenomena|现象:CoEvent={alive|活着}},host={animate|生物}{group|群体},scope={alive|活着}} \n" 
+	    				output +="RMK= \n" ;
+						document.getElementById("output").innerHTML= (Prism.highlight(output, Prism.languages.javascript))
+						
 					}
-					
 				})
-				
 			}])
 			
 		</script>
