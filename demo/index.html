@@ -59,7 +59,7 @@
 							parentObj : document.getElementById("wrodsstart"),  // canvas的父级（两者宽度必须相等）
 							jsonData : JSON.parse(newV) , // 绘图的json
 							openTag : function(unitID){   // 点击事件会获得当前tag的unitID , 随后ajax获取详情
-								showTagDetail(unitID + "\n\n")
+								showTagDetail(unitID + "\n")
 							}
 						});
 						
@@ -67,7 +67,8 @@
 				})
 				
 				function showTagDetail(output){
-					output += "NO.=144261 \n" 
+					// ajax ...
+					output += "NO.=" +  (output==""? '144261 \n': output)
     				output +="W_C=生命 \n"
     				output +="G_C=noun [sheng1 ming4] \n" 
     				output +="S_C= \n" 

@@ -1,8 +1,8 @@
 function drawWords(opt) {
 	
-	var clickPosition;
+	var click_position;
 	opt.canvasObj.addEventListener('click', function(e) {
-		clickPosition = getEventPosition(e);
+		click_position = getEvent_position(e);
 		Init();
 	}, false);
 
@@ -212,7 +212,7 @@ function drawWords(opt) {
 		getPartPoint();
 	}
 
-	function getEventPosition(ev) {
+	function getEvent_position(ev) {
 		var x, y;
 		if(ev.layerX || ev.layerX == 0) {
 			x = ev.layerX;
@@ -292,6 +292,7 @@ function drawWords(opt) {
 		ctx.closePath();
 	}
 	function drawTree(hash) { // 开始绘制
+		var hasClickedTag = false;
 		var lastPointId = hash.headId[hash.headId.length - 1];
 
 		var offsetH = hash.tree[lastPointId].top + hash.tree[lastPointId].height;
@@ -319,22 +320,24 @@ function drawWords(opt) {
 
 		function writeText(point, font) {
 			ctx.font = font || fontSize + "px Arial";
-			
-			if(clickPosition&&makeSureThispoint(clickPosition)) {
-				openThisPoint(point) ;
-				ctx.fillStyle = "#f00";
+			if(point.UnitID){
+				if(click_position&&makeSureThispoint(click_position)) {
+					openThisPoint(point) ;
+					ctx.fillStyle = "#f00";
+				}
+				else {
+					closeThispoint(point);
+					ctx.fillStyle = "#000";
+				}
 			}
-			else if(point.UnitID){
-				closeThispoint(point);
-				ctx.fillStyle = "#000";
-			}else{
+			else{
 				ctx.fillStyle = "#000";
 			}
 			ctx.textAlign = "center";
 			
 			ctx.fillText(point.title, point.left, point.top);
 			
-			function makeSureThispoint(position){
+			function makeSureThispoint(_position){
 				
 				if(!point.id){ // 父子关系标签不可点击
 					return false ;
@@ -343,7 +346,7 @@ function drawWords(opt) {
 				minT = point.top - fontSize/2 - pointMargin/2,
 				maxW = point.left + (point.title.length * fontSize)/2 + pointMargin /2,
 				minW = point.left - (point.title.length * fontSize)/2 - pointMargin /2 ;
-				if(position.x < maxW &&position.x > minW && position.y < maxT &&position.y > minT ){
+				if(_position.x < maxW && _position.x > minW && _position.y < maxT && _position.y > minT ){
 					return true ;
 				}else{
 					return false;
@@ -369,9 +372,7 @@ function drawWords(opt) {
 				circle.drawCircle(ctx);
 				var line2 = new Line(trueLeft- r*2/3, trueTop, trueLeft+ r*2/3, trueTop, '#000',2);
 				line2.drawLine(ctx);
-				if(opt.openTag){
-					opt.openTag(point.UnitID);
-				}
+				hasClickedTag =  point.UnitID;
 			}
 			
 		}
@@ -424,6 +425,11 @@ function drawWords(opt) {
 			ctx.strokeRect(aboutPoint.left - fillW / 2, aboutPoint.top - smallT, fillW, smallHeight) //填充边框 x y坐标 宽 高
 
 			writeText(aboutPoint, smallFontsize + "px Arial");
+		}
+		
+		// 是否点击某个可展示标签
+		if(opt.openTag&&hasClickedTag){
+			opt.openTag(hasClickedTag);
 		}
 
 	}
