@@ -1,12 +1,12 @@
-function drawWords(canvasObj, parentObj, jsonData) {
-
+function drawWords(opt) {
+	
 	var clickPosition;
-	canvasObj.addEventListener('click', function(e) {
+	opt.canvasObj.addEventListener('click', function(e) {
 		clickPosition = getEventPosition(e);
 		Init();
 	}, false);
 
-	var winW = parentObj.offsetWidth;
+	var winW = opt.parentObj.offsetWidth;
 
 	var maxWidth = 1000; // 默认canvas宽度
 	var pagePadding = 40;
@@ -34,24 +34,24 @@ function drawWords(canvasObj, parentObj, jsonData) {
 
 			data.forEach(function(value, index) {
 				var _id = value['idNo'];
-				var _parentId = value['FH'];
+				var _parentId = value['FH'] || value['DP'];
 				var _title = value['expression'];
 				var point = {
 					id: _id,
 					title: _title,
 					left: 0,
 					top: 0,
-					parentAbout: value['log'],
+					parentAbout: value['log'] || value['DeepLog'] || "",
 					width: _title.length * fontWidth + pointMargin,
 					height: piceOneHeight,
 					parentId: _parentId,
 					heightAdded: false,
+					UnitID : value['UnitID'] ,
 					sonIds: []
 				}
 				if(_parentId == "") { // 顶元素
 					var thisPoint = hash.tree[_id] || point;
 					thisPoint.heightAdded = false;
-					//console.log(_id,thisPoint.height,piceOneHeight)
 					thisPoint.left = maxWidth / 2;
 					thisPoint.top = marginToP;
 					var t_index = hash.headId.indexOf(_id);
@@ -73,7 +73,6 @@ function drawWords(canvasObj, parentObj, jsonData) {
 					var thisPoint = hash.tree[_id] || point;
 					thisPoint.heightAdded = false;
 					var parent = hash.tree[_parentId];
-					//console.log(thisPoint.id ,parent)
 					if(parent) {
 						if(parent.sonIds.indexOf(_id) == -1) {
 							parent.sonIds.push(_id)
@@ -100,8 +99,6 @@ function drawWords(canvasObj, parentObj, jsonData) {
 				}
 
 				function getSonsPoint(point) { // 计算子标签left、heigth ;
-					//console.log(point.id,hash.headId.indexOf(point.id))
-
 					point.sonIds.sort(function(a, b) {
 						return a - b;
 					})
@@ -110,15 +107,10 @@ function drawWords(canvasObj, parentObj, jsonData) {
 					var top = point.top;
 					var width = point.width;
 
-					if(point.sonIds.length == 1) {
-						///console.log(startLeft,middle)
-					}
-
 					var sonW = 0;
 					for(var k = 0; k < point.sonIds.length; k++) {
 						sonW += hash.tree[point.sonIds[k]].width + (k == 0 ? 0 : marginX);
 					}
-					//console.log(point,sonW,width)
 					if(sonW < width) {
 						width = sonW;
 					}
@@ -131,7 +123,6 @@ function drawWords(canvasObj, parentObj, jsonData) {
 						hash.tree[point.sonIds[j]].left = startLeft + thisW / 2;
 						hash.tree[point.sonIds[j]].top = top + piceOneHeight;
 						startLeft += hash.tree[point.sonIds[j]].width + marginX;
-						//console.log(top,hash.tree[ point.sonIds[j] ].top)
 
 					}
 
@@ -142,7 +133,6 @@ function drawWords(canvasObj, parentObj, jsonData) {
 			}
 
 			function addParentHeight(point) { // 向上成长父级高度
-				//console.log(point.id,point.parentId)
 				if(point.parentId) {
 					var parentPoint = hash.tree[point.parentId];
 					if(!parentPoint.heightAdded) {
@@ -154,27 +144,20 @@ function drawWords(canvasObj, parentObj, jsonData) {
 			}
 
 			function getThisLeft(point) {
-				//console.log(point)
-
 				return 500;
 			}
 
 			function addParentWidth(point) { // 向上成长父级宽度
 				if(point && point.parentId) {
 					var pointParent = hash.tree[point.parentId];
-					//console.log(pointParent)
 					var width = 0;
-					//console.log(point.id,"to:",pointParent.id)
 					for(var i = 0; i < pointParent.sonIds.length; i++) {
 						var id = pointParent.sonIds[i];
-						//console.log(hash.tree[id].width)
 						width += hash.tree[id].width + (i == 0 ? 0 : marginX);
 					}
-					//console.log(pointParent.id,pointParent.width,width)
 					if(pointParent.width < width) {
 						pointParent.width = width;
 					}
-					//console.log(pointParent.id,pointParent.width)
 					addParentWidth(hash.tree[pointParent.parentId]);
 				}
 			}
@@ -244,24 +227,29 @@ function drawWords(canvasObj, parentObj, jsonData) {
 		};
 	}
 
-	function Line(x1, y1, x2, y2) {
+	function Line(x1, y1, x2, y2,color,width) {
 		this.x1 = x1;
 		this.y1 = y1;
 		this.x2 = x2;
 		this.y2 = y2;
+		this.color = color || "#999" ;
+		this.width = width || 1 ;
 	}
-	Line.prototype.drawWithArrowheads = function(ctx) {
-
-		// arbitrary styling
-		ctx.strokeStyle = "#999";
+	Line.prototype.drawLine = function(ctx) {
+		ctx.strokeStyle = this.color;
 		ctx.fillStyle = "#333";
-		ctx.lineWidth = 1;
+		ctx.lineWidth = this.width;
 
 		// draw the line
 		ctx.beginPath();
 		ctx.moveTo(this.x1, this.y1);
 		ctx.lineTo(this.x2, this.y2);
 		ctx.stroke();
+	}
+	Line.prototype.drawWithArrowheads = function(ctx) {
+
+		// arbitrary styling
+		this.drawLine(ctx);
 
 		// draw the starting arrowhead
 		//      var startRadians=Math.atan((this.y2-this.y1)/(this.x2-this.x1));
@@ -285,13 +273,29 @@ function drawWords(canvasObj, parentObj, jsonData) {
 		ctx.restore();
 		ctx.fill();
 	}
-
+	function Circle(x, y, r,color,line_w , color2) {
+		this.x = x;
+		this.y = y;
+		this.r = r;
+		this.color = color;
+		this.line_w = line_w;
+		this.color2 = color2;
+	}
+	Circle.prototype.drawCircle = function(ctx) {
+		ctx.beginPath();
+		ctx.arc(this.x,this.y,this.r,0,360,false);
+		ctx.fillStyle=this.color;//填充颜色
+		ctx.fill();
+		ctx.lineWidth=this.line_w;
+		ctx.strokeStyle=this.color2; // 线颜色
+		ctx.stroke();
+		ctx.closePath();
+	}
 	function drawTree(hash) { // 开始绘制
-		console.log(hash)
 		var lastPointId = hash.headId[hash.headId.length - 1];
 
 		var offsetH = hash.tree[lastPointId].top + hash.tree[lastPointId].height;
-		var c = canvasObj;
+		var c = opt.canvasObj;
 		c.height = offsetH
 
 		var ctx = c.getContext("2d");
@@ -300,42 +304,73 @@ function drawWords(canvasObj, parentObj, jsonData) {
 
 		//字符
 		for(point in hash.tree) {
-			//console.log(22222,hash.tree[point])
 			writeText(hash.tree[point])
 		}
 
 		// 关系线
 		for(point in hash.tree) {
-			//console.log(22222,hash.tree[point])
 			drawLines(hash.tree[hash.tree[point].parentId], hash.tree[point])
 		}
 
 		//关系节点说明
 		for(point in hash.tree) {
-			//console.log(22222,hash.tree[point])
 			pointAbout(hash.tree[hash.tree[point].parentId], hash.tree[point])
 		}
 
 		function writeText(point, font) {
 			ctx.font = font || fontSize + "px Arial";
-			ctx.fillStyle = "#000";
+			
 			if(clickPosition&&makeSureThispoint(clickPosition)) {
+				openThisPoint(point) ;
 				ctx.fillStyle = "#f00";
 			}
+			else if(point.UnitID){
+				closeThispoint(point);
+				ctx.fillStyle = "#000";
+			}else{
+				ctx.fillStyle = "#000";
+			}
 			ctx.textAlign = "center";
+			
 			ctx.fillText(point.title, point.left, point.top);
 			
 			function makeSureThispoint(position){
+				
+				if(!point.id){ // 父子关系标签不可点击
+					return false ;
+				}
 				var maxT = point.top + fontSize/2 + pointMargin/2 ,
 				minT = point.top - fontSize/2 - pointMargin/2,
 				maxW = point.left + (point.title.length * fontSize)/2 + pointMargin /2,
 				minW = point.left - (point.title.length * fontSize)/2 - pointMargin /2 ;
-				
 				if(position.x < maxW &&position.x > minW && position.y < maxT &&position.y > minT ){
-					
 					return true ;
 				}else{
 					return false;
+				}
+			}
+			
+			function closeThispoint(_point){
+				var trueLeft = _point.left - (_point.title.length * fontSize/2) - fontSize/3 ;
+				var trueTop = _point.top - fontSize/3 ;
+				var r = fontSize/5 ;
+				var circle = new Circle(trueLeft,trueTop,r,"#000",1,"#000");
+				circle.drawCircle(ctx);
+				var line = new Line(trueLeft, trueTop- r*2/3, trueLeft, trueTop+ r*2/3, '#fff',2);
+				line.drawLine(ctx);
+				var line2 = new Line(trueLeft- r*2/3, trueTop, trueLeft+ r*2/3, trueTop, '#fff',2);
+				line2.drawLine(ctx);
+			}
+			function openThisPoint(_point){
+				var trueLeft = _point.left - (_point.title.length * fontSize/2) - fontSize/3 ;
+				var trueTop = _point.top - fontSize/3 ;
+				var r = fontSize/5 ;
+				var circle = new Circle(trueLeft,trueTop,r,"#eee",1,"#999");
+				circle.drawCircle(ctx);
+				var line2 = new Line(trueLeft- r*2/3, trueTop, trueLeft+ r*2/3, trueTop, '#000',2);
+				line2.drawLine(ctx);
+				if(opt.openTag){
+					opt.openTag(point.UnitID);
 				}
 			}
 			
@@ -393,7 +428,7 @@ function drawWords(canvasObj, parentObj, jsonData) {
 
 	}
 
-	canvasObj.style.width = winW + "px";
+	opt.canvasObj.style.width = winW + "px";
 
 	function sortDatas(data, id) {
 
@@ -407,7 +442,7 @@ function drawWords(canvasObj, parentObj, jsonData) {
 	}
 
 	function Init() {
-		getTreaPoint(sortDatas(jsonData, "idNo")); // 开始计算各个点
+		getTreaPoint(sortDatas(opt.jsonData, "idNo")); // 开始计算各个点
 	}
 	Init();
 

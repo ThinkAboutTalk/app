@@ -53,22 +53,36 @@
 
 				$scope.$watch("modelData",function(newV,oldV,scope){
 					if(newV){
-						drawWords(document.getElementById("yun"),document.getElementById("wrodsstart"),JSON.parse(newV));
-						var output = "NO.=144261 \n" 
-	    				output +="W_C=生命 \n"
-	    				output +="G_C=noun [sheng1 ming4] \n" 
-	    				output +="S_C= \n" 
-	    				output +="E_C= \n" 
-	    				output +="W_E=lives \n" 
-	    				output +="G_E=noun [2 lives■noun■-s■static■条		] \n" 
-	    				output +="S_E= \n" 
-	    				output +="E_E= \n" 
-	    				output +="DEF={Life|生命:RelateTo={phenomena|现象:CoEvent={alive|活着}},host={animate|生物}{group|群体},scope={alive|活着}} \n" 
-	    				output +="RMK= \n" ;
-						document.getElementById("output").innerHTML= (Prism.highlight(output, Prism.languages.javascript))
+						// 设置使用绘图
+						drawWords({
+							canvasObj : document.getElementById("yun"),  // 绘图的canvas
+							parentObj : document.getElementById("wrodsstart"),  // canvas的父级（两者宽度必须相等）
+							jsonData : JSON.parse(newV) , // 绘图的json
+							openTag : function(unitID){   // 点击事件会获得当前tag的unitID , 随后ajax获取详情
+								showTagDetail(unitID + "\n\n")
+							}
+						});
 						
 					}
 				})
+				
+				function showTagDetail(output){
+					output += "NO.=144261 \n" 
+    				output +="W_C=生命 \n"
+    				output +="G_C=noun [sheng1 ming4] \n" 
+    				output +="S_C= \n" 
+    				output +="E_C= \n" 
+    				output +="W_E=lives \n" 
+    				output +="G_E=noun [2 lives■noun■-s■static■条		] \n" 
+    				output +="S_E= \n" 
+    				output +="E_E= \n" 
+    				output +="DEF={Life|生命:RelateTo={phenomena|现象:CoEvent={alive|活着}},host={animate|生物}{group|群体},scope={alive|活着}} \n" 
+    				output +="RMK= \n" ;
+    				// Prism 函数用来设置高亮，当前是根据js高亮模式展示 
+					document.getElementById("output").innerHTML= (Prism.highlight(output, Prism.languages.javascript))
+				}
+				showTagDetail("");
+				
 			}])
 			
 		</script>
