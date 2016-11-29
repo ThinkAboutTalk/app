@@ -33,8 +33,14 @@ function drawWords(opt) {
 		function getPartPoint() {
 
 			data.forEach(function(value, index) {
-				var _id = value['idNo'];
-				var _parentId = value['FH'] || value['DP'];
+				var _id = Number(  value['idNo'] );
+				var _parentId =  value['fh']=="" ? value['dp'] : value['fh'] ;
+				
+				if(_parentId=='-01'||_parentId==''){
+					_parentId = null ;
+				}else{
+					_parentId = Number(_parentId);
+				}
 				var _title = value['expression'];
 				var point = {
 					id: _id,
@@ -46,10 +52,10 @@ function drawWords(opt) {
 					height: piceOneHeight,
 					parentId: _parentId,
 					heightAdded: false,
-					UnitID : value['UnitID'] ,
+					UnitID : value['unitID'] ,
 					sonIds: []
 				}
-				if(_parentId == "") { // 顶元素
+				if(!_parentId&&_parentId!=0) { // 顶元素
 					var thisPoint = hash.tree[_id] || point;
 					thisPoint.heightAdded = false;
 					thisPoint.left = maxWidth / 2;
@@ -72,6 +78,7 @@ function drawWords(opt) {
 				} else { // 非顶点
 					var thisPoint = hash.tree[_id] || point;
 					thisPoint.heightAdded = false;
+					console.log(_parentId)
 					var parent = hash.tree[_parentId];
 					if(parent) {
 						if(parent.sonIds.indexOf(_id) == -1) {
@@ -87,8 +94,6 @@ function drawWords(opt) {
 						reCumTrees();
 
 						hash.readyId.push(_id) // 此点完成
-					} else {
-
 					}
 				}
 			})
@@ -163,9 +168,11 @@ function drawWords(opt) {
 			}
 
 			if(!testAllPointReady()) { // 所有点并未计算完毕
+				
 				getPartPoint();
 			} else if(testMaxWidthUseful()) { // 宽度不超出画布
 				drawTree(hash);
+				console.log(hash)
 			} else { // 超出了画布
 				getTreaPoint(data);
 			}
@@ -174,7 +181,7 @@ function drawWords(opt) {
 		function testAllPointReady() { // 确认所有点计算完毕
 			var has = true;
 			data.forEach(function(value, index) {
-				var _id = value['idNo'];
+				var _id = Number(value['idNo']);
 				if(hash.readyId.indexOf(_id) == -1) {
 					has = false;
 					return;
