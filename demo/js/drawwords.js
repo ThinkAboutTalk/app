@@ -153,7 +153,7 @@ function drawWords(opt) {
 			}
 
 			function addParentWidth(point) { // 向上成长父级宽度
-				if(point && point.parentId) {
+				if(point && ( point.parentId || point.parentId==0 )) {
 					var pointParent = hash.tree[point.parentId];
 					var width = 0;
 					for(var i = 0; i < pointParent.sonIds.length; i++) {
@@ -195,6 +195,7 @@ function drawWords(opt) {
 			for(var i in hash.tree) {
 				hash.tree[i].width > _maxWidth ? _maxWidth = hash.tree[i].width : false;
 			}
+			
 			if(_maxWidth > maxWidth - pagePadding * 2) {
 
 				var bit = (maxWidth - pagePadding * 2) / _maxWidth;
@@ -210,6 +211,7 @@ function drawWords(opt) {
 				smallHeight = smallHeight * bit;
 				smallT = smallT * bit;
 				return false;
+				
 			} else {
 				return true;
 			}
