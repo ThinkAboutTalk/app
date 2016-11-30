@@ -78,7 +78,7 @@ function drawWords(opt) {
 				} else { // 非顶点
 					var thisPoint = hash.tree[_id] || point;
 					thisPoint.heightAdded = false;
-					console.log(_parentId)
+					
 					var parent = hash.tree[_parentId];
 					if(parent) {
 						if(parent.sonIds.indexOf(_id) == -1) {
@@ -138,7 +138,7 @@ function drawWords(opt) {
 			}
 
 			function addParentHeight(point) { // 向上成长父级高度
-				if(point.parentId) {
+				if(point.parentId||point.parentId==0) {
 					var parentPoint = hash.tree[point.parentId];
 					if(!parentPoint.heightAdded) {
 						parentPoint.height += piceOneHeight;
@@ -302,7 +302,7 @@ function drawWords(opt) {
 		var hasClickedTag = false;
 		var lastPointId = hash.headId[hash.headId.length - 1];
 
-		var offsetH = hash.tree[lastPointId].top + hash.tree[lastPointId].height;
+		var offsetH = hash.tree[lastPointId].top + hash.tree[lastPointId].height ;
 		var c = opt.canvasObj;
 		c.height = offsetH
 
@@ -455,6 +455,7 @@ function drawWords(opt) {
 	}
 
 	function Init() {
+		console.log(opt.jsonData);
 		getTreaPoint(sortDatas(opt.jsonData, "idNo")); // 开始计算各个点
 	}
 	Init();
