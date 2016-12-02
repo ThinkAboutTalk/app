@@ -39,13 +39,13 @@
 	    	<div class="row" ng-if="!modelData==''">
 	    		<div class="col-md-12">
 		    		<div class="dropdown">
-						<button class="btn btn-default dropdown-toggle" type="button"  data-toggle="dropdown">
+						<button class="btn btn-default dropdown-toggle" type="button"  id="dropdownMenu1"   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						  	 段落 {{checkedIndex + 1  }}
 						    <span class="caret"></span>
 						</button>
-						<ul ng-click="checkAnalysis($event)" class="dropdown-menu" aria-labelledby="dropdownMenu1">
-							<li ng-repeat="list in parseModelData track by $index ">
-								<a data-index="{{$index}}" href="#">段落{{$index+1}}</a>
+						<ul ng-click="checkAnalysis($event)" class="dropdown-menu"  role="menu"  aria-labelledby="dropdownMenu1">
+							<li ng-repeat="list in parseModelData track by $index " role="presentation">
+								<a  role="menuitem" data-index="{{$index}}" href="#">段落{{$index+1}}</a>
 							</li>
 						</ul>
 					</div>
@@ -72,6 +72,8 @@
 	    	</div>
 	    </div>
 		
+		<script type="text/javascript" src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+		<script type="text/javascript" src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="http://cdn.bootcss.com/angular.js/1.5.8/angular.min.js"></script>
 		<script type="text/javascript" src="js/drawwords.js"></script>
 		<script src="js/prism.js" ></script>
@@ -101,8 +103,10 @@
 						angular.extend(opt,{jsonData:$scope.parseModelData[$scope.checkedIndex]})
 						//执行绘图
 						drawWords(opt);
-						
+						event.stopPropagation();
 					}
+					event.preventDefault();
+					return false ;
 				}
 				
 				// canvas绘图的默认设置

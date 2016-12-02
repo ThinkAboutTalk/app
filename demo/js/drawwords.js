@@ -304,7 +304,7 @@ function drawWords(opt) {
 		var hasClickedTag = false;
 		var lastPointId = hash.headId[hash.headId.length - 1];
 
-		var offsetH = hash.tree[lastPointId].top + hash.tree[lastPointId].height ;
+		var offsetH = hash.tree[lastPointId].top + hash.tree[lastPointId].height + pagePadding * 5 ;
 		var c = opt.canvasObj;
 		c.height = offsetH
 
