@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html ng-app="drawwordsModule">
+
+	<head>
+		<meta charset="utf-8" />
+		<title>demo</title>
+		<link type="text/css" rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" />
+		<link type="text/css" rel="stylesheet" href="css/prism.css" />
+	</head>
+
+	<body ng-controller="demoCtrl">
+
+		<div class="jumbotron masthead">
+			<div class="container">
+				<h1>展示demo</h1>
+				<h2>向文本区域输入要分析的语句</h2>
+				<div class="row">
+					<div class="col-md-12">
+						<textarea class="form-control" rows="2" id="inputarea" placeholder="//需要分析的语句"></textarea>
+						<div>
+							<ul>
+								<li>
+									<a href="#" id="but_login">分析</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="container projects">
+			<div class="row">
+				<div class="col-md-6">
+
+					<textarea class="form-control" id="resultarea" rows="30" ng-model="modelData" placeholder="//仅支持输入JSON格式数据"></textarea>
+
+				</div>
+				<div class="col-md-6">
+
+					<div id="wrodsstart" style="overflow:hidden;overflow-y: auto;height:618px;border:1px solid #ddd;border-radius: .25rem;">
+						<canvas id="yun" width="1000px" style=""></canvas>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<div class="container projects">
+			<div class="row">
+				<div class="col-md-12">
+					<pre><code id="output"  class="language-javascript">
+	    			</code></pre>
+				</div>
+			</div>
+		</div>
+
+		<script type="text/javascript" src="http://cdn.bootcss.com/angular.js/1.5.8/angular.min.js"></script>
+		<script type="text/javascript" src="js/drawwords.js"></script>
+		<script src="js/prism.js"></script>
+		<script type="text/javascript" src="plug-in/jquery/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="plug-in/jquery/jquery.cookie.js"></script>
+		<script type="text/javascript" src="plug-in/login/js/jquery-jrumble.js"></script>
+		<script type="text/javascript" src="plug-in/login/js/jquery.tipsy.js"></script>
+		<script type="text/javascript">
+			$('#but_login').click(function(e) {
+
+				$.ajax({
+					type: "POST",
+					url: "/keenage/keenageUserController.do?dll",
+					//提交的数据
+					data: {
+						input: $("#inputarea").val()
+					},
+					//返回数据的格式
+					datatype: "json",
+
+					//成功返回之后调用的函数             
+					success: function(data) {
+						$("#resultarea").val(data);
+						// 设置使用绘图
+						drawWords({
+							canvasObj: document.getElementById("yun"), // 绘图的canvas
+							parentObj: document.getElementById("wrodsstart"), // canvas的父级（两者宽度必须相等）
+							jsonData: JSON.parse(data), // 绘图的json
+							openTag: function(unitID) { // 点击事件会获得当前tag的unitID , 随后ajax获取详情
+								showTagDetail(unitID + "\n")
+							}
+						});
+					},
+
+					//调用出错执行的函数
+					error: function() {
+						//请求出错处理
+					}
+				});
+
+			});
+			var module = angular.module("drawwordsModule", []);
+			module.controller("demoCtrl", ["$scope", function($scope) {
+				$scope.modelData = "";
+
+				$scope.$watch("modelData", function(newV, oldV, scope) {
+					if(newV) {
+						// 设置使用绘图
+						drawWords({
+							canvasObj: document.getElementById("yun"), // 绘图的canvas
+							parentObj: document.getElementById("wrodsstart"), // canvas的父级（两者宽度必须相等）
+							jsonData: JSON.parse(newV), // 绘图的json
+							openTag: function(unitID) { // 点击事件会获得当前tag的unitID , 随后ajax获取详情
+								showTagDetail(unitID + "\n")
+							}
+						});
+
+					}
+				})
+
+				function showTagDetail(output) {
+					// ajax ...
+					output += "NO.=" + (output == "" ? '144261 \n' : output)
+					output += "W_C=生命 \n"
+					output += "G_C=noun [sheng1 ming4] \n"
+					output += "S_C= \n"
+					output += "E_C= \n"
+					output += "W_E=lives \n"
+					output += "G_E=noun [2 lives■noun■-s■static■条		] \n"
+					output += "S_E= \n"
+					output += "E_E= \n"
+					output += "DEF={Life|生命:RelateTo={phenomena|现象:CoEvent={alive|活着}},host={animate|生物}{group|群体},scope={alive|活着}} \n"
+					output += "RMK= \n";
+					// Prism 函数用来设置高亮，当前是根据js高亮模式展示 
+					document.getElementById("output").innerHTML = (Prism.highlight(output, Prism.languages.javascript))
+				}
+				showTagDetail("");
+
+			}])
+		</script>
+
+	</body>
+
+</html>

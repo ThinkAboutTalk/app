@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html ng-app="drawwordsModule">
+	<head>
+		<meta charset="utf-8" />
+		<title>demo</title>
+		<link type="text/css" rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css"  />
+		<link type="text/css" rel="stylesheet" href="css/prism.css"  />
+	</head>
+	<body ng-controller="demoCtrl">
+		
+		<div class="jumbotron masthead">
+	      <div class="container">
+	        <h1>展示demo</h1>
+	        <h2>向文本区域输入要分析的语句</h2>
+	      </div>
+	    </div>
+	    
+	    <div class="container projects">
+	    	<div class="row">
+	    		<div class="col-md-12">
+	    			<textarea class="form-control" rows="5" ng-model="analysiswords" placeholder="//输入要分析的语句"></textarea>
+	    		</div>
+	    	</div>
+	    	<hr />
+	    	<div class="row">
+	    		<div class="col-md-12">
+	    			<button class="btn btn-default" ng-click="ajaxAnalysis()" type="button"  >
+					    开始分析
+					</button>
+	    		</div>
+	    	</div>
+	    	<hr />
+	    	<div class="row">
+	    		<div class="col-md-12">
+	    			<textarea class="form-control" rows="5" ng-model="modelData" placeholder="//仅支持输入JSON格式数据"></textarea>
+	    		</div>
+	    	</div>
+	    	<hr />
+	    	<div class="row" ng-if="!modelData==''">
+	    		<div class="col-md-12">
+		    		<div class="dropdown">
+						<button class="btn btn-default dropdown-toggle" type="button"  id="dropdownMenu1"   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						  	 段落 {{checkedIndex}}
+						  	 
+						    <span class="caret"></span>
+						</button>
+						<ul ng-click="checkAnalysis($event)" class="dropdown-menu"  role="menu"  aria-labelledby="dropdownMenu1">
+							<li ng-repeat="list in parseModelData track by $index " role="presentation">
+								<a  role="menuitem" data-index="{{$index}}" href="#">段落{{$index+1}}</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+	    	</div>
+	    	<hr  ng-if="!modelData==''" />
+	    	<div class="row">
+	    		<div class="col-md-12">
+	    			
+    				<div id="wrodsstart" style="overflow:hidden;overflow-y: auto;height:618px;border:1px solid #ddd;border-radius: .25rem;">
+						<canvas id="yun"  width="1000px" style=""></canvas>
+					</div>
+	    			
+	    		</div>
+	    	</div>
+	    </div>
+	    
+	    <div class="container projects">
+	    	<div class="row">
+	    		<div class="col-md-12">
+	    			<pre ><code id="output"  class="language-javascript">
+	    			</code></pre>
+	    		</div>
+	    	</div>
+	    </div>
+		
+		<script type="text/javascript" src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+		<script type="text/javascript" src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="http://cdn.bootcss.com/angular.js/1.5.8/angular.min.js"></script>
+		<script type="text/javascript" src="js/drawwords.js"></script>
+		<script src="js/prism.js" ></script>
+		<script type="text/javascript">
+		
+			var module = angular.module("drawwordsModule",[]);
+			module.controller("demoCtrl",["$scope","$http",function($scope,$http){
+				$http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
+				$scope.analysiswords = "" ;
+				$scope.ajaxAnalysis = function (){
+					
+					var url = "/keenage/keenageUserController.do?dll" ;
+					var data = $.param({input:$scope.analysiswords}) ;
+
+					$http.post(url,data).success(function(sus){
+						$scope.modelData = JSON.stringify(sus) ;
+					})
+				}
+				
+				// 分析语句切换
+				$scope.parseModelData = [];
+				$scope.checkedIndex = 1;
+				$scope.checkAnalysis = function(event){
+					if(event.target.tagName=="A"){
+						//获取点击的按钮
+						$scope.checkedIndex = Number(event.target.getAttribute("data-index"))+1;
+						//替换当前对应的json
+						angular.extend(opt,{jsonData:$scope.parseModelData[$scope.checkedIndex-1]})
+						//执行绘图
+						drawWords(opt);
+						event.stopPropagation();
+					}
+					event.preventDefault();
+					return false ;
+				}
+				
+				// canvas绘图的默认设置
+				var opt = {
+					canvasObj : document.getElementById("yun"),  // 绘图的canvas
+					parentObj : document.getElementById("wrodsstart"),  // canvas的父级（两者宽度必须相等）
+					jsonData : [] , // 绘图的json
+					openTag : function(unitID){   // 点击事件会获得当前tag的unitID , 随后ajax获取详情
+						showTagDetail(unitID + "\n")
+					}
+				}
+				
+				// 绑定的数据
+				$scope.modelData = "" ;
+				
+				// 监听分析语句json的变化
+				$scope.$watch("modelData",function(newV,oldV,scope){
+					if(newV){
+						
+						$scope.parseModelData = JSON.parse(newV)
+						// 设置
+						angular.extend(opt,{jsonData:$scope.parseModelData[0]});
+						//使用绘图
+						drawWords(opt);
+						
+					}
+				})
+				
+				// 词语详情展示
+				function showTagDetail(output){
+					// ajax ...
+					output += "NO.=" +  (output==""? '144261 \n': output)
+    				output +="W_C=生命 \n"
+    				output +="G_C=noun [sheng1 ming4] \n" 
+    				output +="S_C= \n" 
+    				output +="E_C= \n" 
+    				output +="W_E=lives \n" 
+    				output +="G_E=noun [2 lives■noun■-s■static■条		] \n" 
+    				output +="S_E= \n" 
+    				output +="E_E= \n" 
+    				output +="DEF={Life|生命:RelateTo={phenomena|现象:CoEvent={alive|活着}},host={animate|生物}{group|群体},scope={alive|活着}} \n" 
+    				output +="RMK= \n" ;
+    				// Prism 函数用来设置高亮，当前是根据js高亮模式展示 
+					document.getElementById("output").innerHTML= (Prism.highlight(output, Prism.languages.javascript))
+				}
+				showTagDetail("");
+				
+			}])
+			
+		</script>
+		
+	</body>
+</html>
