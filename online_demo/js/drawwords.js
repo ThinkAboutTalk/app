@@ -144,15 +144,20 @@ function drawWords(opt) {
 					}
 				}
 			}
-
-			function addParentHeight(point) { // 向上成长父级高度
+			
+			var deepSection = 1 ;
+			function addParentHeight(point,deepnotStart) { // 向上成长父级高度
+				if(!deepnotStart){
+					deepSection = 1 ;
+				}
+				
 				if(point.parentId||point.parentId==0) {
 					var parentPoint = hash.tree[point.parentId];
-					if(!parentPoint.heightAdded) {
-						parentPoint.height += piceOneHeight;
-						parentPoint.heightAdded = true;
+					deepSection ++ ;
+					if(parentPoint.height<piceOneHeight*deepSection) {
+						parentPoint.height = piceOneHeight*deepSection;
 					}
-					addParentHeight(parentPoint);
+					addParentHeight(parentPoint,true);
 				}
 			}
 
@@ -180,7 +185,7 @@ function drawWords(opt) {
 				getPartPoint();
 			} else if(testMaxWidthUseful()) { // 宽度不超出画布
 				drawTree(hash);
-				console.log(hash)
+				
 			} else { // 超出了画布
 				getTreaPoint(data);
 			}
@@ -208,7 +213,7 @@ function drawWords(opt) {
 
 				var bit = window_bit = (maxWidth - pagePadding * 2) / _maxWidth;
 				marginX = marginX * bit; // 标签横间距
-				marginY = marginY * bit <=100 ? 100 : marginY * bit ; // 标签竖间距
+				marginY = marginY * bit <=70 ? 70 : marginY * bit ; // 标签竖间距
 				marginToP = marginToP * bit; // 单元竖向 间距
 				fontSize = fontSize * bit; // 字体大小
 				fontWidth = fontWidth * bit // 每个字符对应宽度
@@ -286,8 +291,8 @@ function drawWords(opt) {
 		ctx.translate(x, y);
 		ctx.rotate(radians);
 		ctx.moveTo(0, 0);
-		ctx.lineTo(3*window_bit, 10*window_bit);
-		ctx.lineTo(-3*window_bit, 10*window_bit);
+		ctx.lineTo(3*window_bit<1?2:3*window_bit, 10*window_bit<3?6:10*window_bit);
+		ctx.lineTo(-3*window_bit>-1?-2:-3*window_bit, 10*window_bit<3?6:10*window_bit);
 		ctx.closePath();
 		ctx.restore();
 		ctx.fill();
@@ -313,8 +318,10 @@ function drawWords(opt) {
 	function drawTree(hash) { // 开始绘制
 		var hasClickedTag = false;
 		var lastPointId = hash.headId[hash.headId.length - 1];
-
-		var offsetH = hash.tree[lastPointId].top + hash.tree[lastPointId].height + marginY * 2 + piceOneHeight ;
+		
+		var offsetH = hash.tree[lastPointId].top + hash.tree[lastPointId].height ;
+		console.log("hash",hash)
+		console.log("offsetH",offsetH,hash.tree[lastPointId].top , hash.tree[lastPointId].height)
 		var c = opt.canvasObj;
 		c.height = offsetH
 
@@ -385,7 +392,7 @@ function drawWords(opt) {
 			}
 			
 			function closeThispoint(_point){
-				var trueLeft = _point.left - (_point.title.length * fontSize/2) - fontSize/3 ;
+				var trueLeft = _point.left - (_point.title.length * fontSize/2) - fontSize/2 ;
 				var trueTop = _point.top - fontSize/3 ;
 				var r = fontSize/5 ;
 				var circle = new Circle(trueLeft,trueTop,r,"#000",1,"#000");
@@ -396,7 +403,7 @@ function drawWords(opt) {
 				line2.drawLine(ctx);
 			}
 			function openThisPoint(_point){
-				var trueLeft = _point.left - (_point.title.length * fontSize/2) - fontSize/3 ;
+				var trueLeft = _point.left - (_point.title.length * fontSize/2) - fontSize/2 ;
 				var trueTop = _point.top - fontSize/3 ;
 				var r = fontSize/5 ;
 				var circle = new Circle(trueLeft,trueTop,r,"#eee",1,"#999");
@@ -458,7 +465,7 @@ function drawWords(opt) {
 			writeText(aboutPoint, smallFontsize + "px Arial" , 90);
 			
 			if(pointson.deep>0&&pointson.deep==pointparent.id){
-				console.log(pointparent,pointson)
+				//console.log(pointparent,pointson)
 				drawCurve(pointparent,pointson,{left:prevL,top:prevT},{left:nextL,top:nextT-fontSize/2});
 			}
 		}
@@ -471,17 +478,17 @@ function drawWords(opt) {
 	        ctx.bezierCurveTo(
 	        	thispointLT.left+marginX*5,parentLT.top,
 	        	thispointLT.left+marginX*5,thispointLT.top,
-	        	thispointLT.left,thispointLT.top
+	        	thispointLT.left,thispointLT.top - pointMargin / 4 
 	        );
 	        ctx.stroke();
 	        
 	        ctx.save();
 			ctx.beginPath();
 			ctx.translate(thispointLT.left,parentLT.top);
-			ctx.rotate(-90 * Math.PI / 180);
+			ctx.rotate(-45 * Math.PI / 180);
 			ctx.moveTo(0, 0);
-			ctx.lineTo(3*window_bit, 10*window_bit);
-			ctx.lineTo(-3*window_bit, 10*window_bit);
+			ctx.lineTo(3*window_bit<1?2:3*window_bit, 10*window_bit<6?3:10*window_bit);
+			ctx.lineTo(-3*window_bit>-1?-2:-3*window_bit, 10*window_bit<3?6:10*window_bit);
 			ctx.closePath();
 			ctx.fillStyle="#f00";
 			ctx.fill();
@@ -501,10 +508,9 @@ function drawWords(opt) {
 		}
 
 	}
-	console.log(winW)
+	
 	
 	opt.canvasObj.style.width = winW + "px";
-	
 	
 
 	function sortDatas(data, id) {
@@ -519,7 +525,7 @@ function drawWords(opt) {
 	}
 
 	function Init() {
-		console.log(opt.jsonData);
+		
 		getTreaPoint(sortDatas(opt.jsonData, "idNo")); // 开始计算各个点
 	}
 	Init();
