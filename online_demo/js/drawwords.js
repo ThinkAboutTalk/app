@@ -53,7 +53,7 @@ function drawWords(opt) {
 					left: 0,
 					top: 0,
 					parentAbout: value['log']  || "",
-					width: _title.length * fontWidth + pointMargin,
+					width: getThisWidth(_title),
 					height: piceOneHeight,
 					parentId: _parentId,
 					heightAdded: false,
@@ -107,6 +107,8 @@ function drawWords(opt) {
 					}
 				}
 			})
+			
+			
 
 			function reCumTrees() { // 向下计算子元素
 				for(var i = 0; i < hash.headId.length; i++) {
@@ -396,7 +398,7 @@ function drawWords(opt) {
 			}
 			
 			function closeThispoint(_point){
-				var trueLeft = _point.left - (_point.title.length * fontSize/2) - fontSize/2 ;
+				var trueLeft = _point.left - ( (_point.title.length - getLength(_point.title)/2 ) * fontSize/2) - fontSize/2 ;
 				var trueTop = _point.top - fontSize/3 ;
 				var r = fontSize/5 ;
 				var circle = new Circle(trueLeft,trueTop,r,"#000",1,"#000");
@@ -407,7 +409,7 @@ function drawWords(opt) {
 				line2.drawLine(ctx);
 			}
 			function openThisPoint(_point){
-				var trueLeft = _point.left - (_point.title.length * fontSize/2) - fontSize/2 ;
+				var trueLeft = _point.left - ((_point.title.length - getLength(_point.title) /2) * fontSize/2) - fontSize/2 ;
 				var trueTop = _point.top - fontSize/3 ;
 				var r = fontSize/5 ;
 				var circle = new Circle(trueLeft,trueTop,r,"#eee",1,"#999");
@@ -516,6 +518,17 @@ function drawWords(opt) {
 	
 	opt.canvasObj.style.width = winW + "px";
 	
+	function getLength(str){
+		    if(/[a-z]/i.test(str)){
+		        return str.match(/[a-z]/ig).length;
+		    }
+		    return 0;
+	}
+	
+	function getThisWidth(_title){
+		var len =_title.length - getLength(_title)/2 ;
+		return len * fontWidth + pointMargin ;
+	}
 
 	function sortDatas(data, id) {
 
@@ -527,10 +540,22 @@ function drawWords(opt) {
 
 		return data;
 	}
+	
+	function filterData(data){
+		var reg = new RegExp(/[\u3002|\uff1f|\uff01|\uff0c|\u3001|\uff1b|\uff1a|\u201c|\u201d|\u2018|\u2019|\uff08|\uff09|\u300a|\u300b|\u3008|\u3009|\u3010|\u3011|\u300e|\u300f|\u300c|\u300d|\ufe43|\ufe44|\u3014|\u3015|\u2026|\u2014|\uff5e|\ufe4f|\uffe5]/g) ;
+		var newData = [] ;
+		for(var i=0;i<data.length;i++){
+			if(!reg.test(data[i].expression)){
+				newData.push(data[i]);
+			}
+		}
+		return newData;
+		
+	}
 
 	function Init() {
 		
-		getTreaPoint(sortDatas(opt.jsonData, "idNo")); // 开始计算各个点
+		getTreaPoint(sortDatas(filterData(opt.jsonData), "idNo")); // 开始计算各个点
 	}
 	Init();
 
