@@ -3,6 +3,10 @@ function drawWords(opt) {
 	var click_position;
 	opt.canvasObj.addEventListener('click', function(e) {
 		click_position = getEvent_position(e);
+//		console.log("点击weizi",click_position)
+//		console.log("maxWidth",maxWidth)
+//		console.log("winW",winW)
+//		console.log("window_bit",window_bit)
 		Init();
 	}, false);
 
@@ -13,7 +17,7 @@ function drawWords(opt) {
 	var marginX = 20; // 标签横间距
 	var marginY = 120; // 标签竖间距
 	var marginToP = 200; // 单元竖向 间距
-	var fontSize = 60; // 字体大小
+	var fontSize = 40; // 字体大小
 	var smallFontsize = 2;
 	var fontWidth = fontSize; // 每个字符对应宽度
 	var pointMargin = 60; // 标签内部填充
@@ -22,8 +26,6 @@ function drawWords(opt) {
 	var smallHeight = 40;
 	var smallT = 25;
 	var window_bit = 1 ;
-	
-	
 
 	function getTreaPoint(data) { // 获取数据对应关系，确定每条数据对应的点和其父级的点
 
@@ -213,7 +215,7 @@ function drawWords(opt) {
 
 				var bit = window_bit = (maxWidth - pagePadding * 2) / _maxWidth;
 				marginX = marginX * bit; // 标签横间距
-				marginY = marginY * bit <=70 ? 70 : marginY * bit ; // 标签竖间距
+				marginY = marginY * bit <=80 ? 80 : marginY * bit ; // 标签竖间距
 				marginToP = marginToP * bit; // 单元竖向 间距
 				fontSize = fontSize * bit; // 字体大小
 				fontWidth = fontWidth * bit // 每个字符对应宽度
@@ -236,19 +238,16 @@ function drawWords(opt) {
 		getPartPoint();
 	}
 
-	function getEvent_position(ev) {
+	function getEvent_position(evt) {
+		console.log(evt)
 		var x, y;
-		if(ev.layerX || ev.layerX == 0) {
-			x = ev.layerX;
-			y = ev.layerY;
-		} else if(ev.offsetX || ev.offsetX == 0) { // Opera
-			x = ev.offsetX;
-			y = ev.offsetY;
-		}
+		var rect = opt.canvasObj.getBoundingClientRect();
+//		console.log(rect)
+//		console.log(( rect.left * (opt.canvasObj.width / rect.width) *  opt.canvasObj.width  / maxWidth ),evt.clientX)
 		return {
-			x: x * maxWidth/winW,
-			y: y * maxWidth/winW
-		};
+		     x: evt.clientX -  rect.left ,
+		     y: evt.clientY -  rect.top 
+		}
 	}
 
 	function Line(x1, y1, x2, y2,color,width) {
@@ -321,7 +320,6 @@ function drawWords(opt) {
 		
 		var offsetH = hash.tree[lastPointId].top + hash.tree[lastPointId].height ;
 		console.log("hash",hash)
-		console.log("offsetH",offsetH,hash.tree[lastPointId].top , hash.tree[lastPointId].height)
 		var c = opt.canvasObj;
 		c.height = offsetH
 
@@ -376,10 +374,16 @@ function drawWords(opt) {
 			
 			
 			function makeSureThispoint(_position){
+				//console.log("maxWidth",maxWidth)
+				//console.log("winW",winW)
 				
-				if(!point.id){ // 父子关系标签不可点击
-					return false ;
+				var _position = {
+					x : _position.x * maxWidth / winW ,
+					y : _position.y * maxWidth / winW
 				}
+//				if(!point.id){ // 父子关系标签不可点击
+//					return false ;
+//				}
 				var maxT = point.top + fontSize/2 + pointMargin/2 ,
 				minT = point.top - fontSize/2 - pointMargin/2,
 				maxW = point.left + (point.title.length * fontSize)/2 + pointMargin /2,
@@ -450,7 +454,7 @@ function drawWords(opt) {
 			var aboutPoint = {
 					title: pointson.parentAbout,
 					left: nextL, // Math.abs(prevL - nextL )/2+ (prevL >nextL ?  nextL : prevL)   ,
-					top: nextT - piceOneHeight / 2 // Math.abs(prevT - nextT )  +  prevT-piceOneHeight / 2,
+					top: nextT - piceOneHeight / 2 + fontSize/4 // Math.abs(prevT - nextT )  +  prevT-piceOneHeight / 2,
 				}
 				//ctx.fillRect()="#000";
 

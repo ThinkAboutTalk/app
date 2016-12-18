@@ -1,4 +1,4 @@
-function drawWords(opt) {
+﻿function drawWords(opt) {
 	
 	var click_position;
 	opt.canvasObj.addEventListener('click', function(e) {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html ng-app="drawwordsModule">
 	<head>
 		<meta charset="utf-8" />
@@ -40,7 +40,7 @@
 	    		<div class="col-md-12">
 		    		<div class="dropdown">
 						<button class="btn btn-default dropdown-toggle" type="button"  id="dropdownMenu1"   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						  	 段落 {{checkedIndex + 1  }}
+						  	 段落 {{checkedIndex  }}
 						    <span class="caret"></span>
 						</button>
 						<ul ng-click="checkAnalysis($event)" class="dropdown-menu"  role="menu"  aria-labelledby="dropdownMenu1">
@@ -94,13 +94,15 @@
 				
 				// 分析语句切换
 				$scope.parseModelData = [];
-				$scope.checkedIndex = 0;
+				$scope.checkedIndex = 1;
 				$scope.checkAnalysis = function(event){
 					if(event.target.tagName=="A"){
 						//获取点击的按钮
-						$scope.checkedIndex = event.target.getAttribute("data-index");
+						$scope.checkedIndex = Number(event.target.getAttribute("data-index"))+1;
 						//替换当前对应的json
-						angular.extend(opt,{jsonData:$scope.parseModelData[$scope.checkedIndex]})
+						console.log(1111,opt)
+						angular.extend(opt,{jsonData:$scope.parseModelData[$scope.checkedIndex-1]})
+						console.log(2222,opt)
 						//执行绘图
 						drawWords(opt);
 						event.stopPropagation();
