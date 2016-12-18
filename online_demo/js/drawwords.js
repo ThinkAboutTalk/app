@@ -18,7 +18,7 @@ function drawWords(opt) {
 	var marginY = 120; // 标签竖间距
 	var marginToP = 200; // 单元竖向 间距
 	var fontSize = 40; // 字体大小
-	var smallFontsize = 2;
+	var smallFontsize = 20;
 	var fontWidth = fontSize; // 每个字符对应宽度
 	var pointMargin = 60; // 标签内部填充
 	var piceOneHeight = fontSize + 60 + marginY; //标签高度
@@ -53,7 +53,7 @@ function drawWords(opt) {
 					left: 0,
 					top: 0,
 					parentAbout: value['log']  || "",
-					width: getThisWidth(_title),
+					width: getThisWidth(_title,value['log']),
 					height: piceOneHeight,
 					parentId: _parentId,
 					heightAdded: false,
@@ -104,6 +104,8 @@ function drawWords(opt) {
 						reCumTrees();
 
 						hash.readyId.push(_id) // 此点完成
+					}else{
+						//hash.readyId.push(_id) // 此点完成
 					}
 				}
 			})
@@ -183,14 +185,21 @@ function drawWords(opt) {
 					addParentWidth(hash.tree[pointParent.parentId]);
 				}
 			}
-
+			var ddd = 0 ;
 			if(!testAllPointReady()) { // 所有点并未计算完毕
+				
 				
 				getPartPoint();
 			} else if(testMaxWidthUseful()) { // 宽度不超出画布
 				drawTree(hash);
 				
 			} else { // 超出了画布
+				
+				ddd ++ ;
+				//console.log(hash)
+				if(ddd > 3){
+					 return false;
+				}
 				getTreaPoint(data);
 			}
 		}
@@ -212,22 +221,21 @@ function drawWords(opt) {
 			for(var i in hash.tree) {
 				hash.tree[i].width > _maxWidth ? _maxWidth = hash.tree[i].width : false;
 			}
-			
+			console.log("_maxWidth",_maxWidth,"maxWidth",maxWidth)
 			if(_maxWidth > maxWidth - pagePadding * 2) {
 
 				var bit = window_bit = (maxWidth - pagePadding * 2) / _maxWidth;
 				marginX = marginX * bit; // 标签横间距
-				marginY = marginY * bit <=80 ? 80 : marginY * bit ; // 标签竖间距
+				marginY = marginY * bit <=50 ? 50 : marginY * bit ; // 标签竖间距
 				marginToP = marginToP * bit; // 单元竖向 间距
 				fontSize = fontSize * bit; // 字体大小
 				fontWidth = fontWidth * bit // 每个字符对应宽度
 				pointMargin = pointMargin * bit // 标签内部填充
 				piceOneHeight = fontSize + 60 * bit + marginY //标签高度
-				smallFontsize =  smallFontsize * bit <=12 ? 12 : smallFontsize * bit ;
+				smallFontsize =  smallFontsize * bit ;
 				smallfillW = smallfillW * bit;
 				smallHeight = smallHeight * bit;
 				smallT = smallT * bit;
-				
 				
 				return false;
 				
@@ -456,7 +464,7 @@ function drawWords(opt) {
 			var aboutPoint = {
 					title: pointson.parentAbout,
 					left: nextL, // Math.abs(prevL - nextL )/2+ (prevL >nextL ?  nextL : prevL)   ,
-					top: nextT - piceOneHeight / 2 + fontSize/4 // Math.abs(prevT - nextT )  +  prevT-piceOneHeight / 2,
+					top: nextT - piceOneHeight / 2.4 // Math.abs(prevT - nextT )  +  prevT-piceOneHeight / 2,
 				}
 				//ctx.fillRect()="#000";
 
@@ -465,10 +473,10 @@ function drawWords(opt) {
 			ctx.fillStyle = "#f1f1f1"; //填充的颜色
 			ctx.strokeStyle = "#ddd"; //边框颜色
 			ctx.linewidth = 10; //边框宽
-			//ctx.fillRect(aboutPoint.left - fillW / 2, aboutPoint.top - smallT, fillW, smallHeight); //填充颜色 x y坐标 宽 高
-			//ctx.strokeRect(aboutPoint.left - fillW / 2, aboutPoint.top - smallT, fillW, smallHeight) //填充边框 x y坐标 宽 高
+//			ctx.fillRect(aboutPoint.left - fillW / 2, aboutPoint.top, fillW, smallHeight*2); //填充颜色 x y坐标 宽 高
+//			ctx.strokeRect(aboutPoint.left - fillW / 2, aboutPoint.top, fillW, smallHeight*2) //填充边框 x y坐标 宽 高
 
-			writeText(aboutPoint, smallFontsize + "px Arial" , 90);
+			writeText(aboutPoint, smallFontsize + "px Arial");
 			
 			if(pointson.deep>0&&pointson.deep==pointparent.id){
 				//console.log(pointparent,pointson)
@@ -525,9 +533,16 @@ function drawWords(opt) {
 		    return 0;
 	}
 	
-	function getThisWidth(_title){
+	function getThisWidth(_title,deeplog){
+		//console.log(deeplog)
+		
 		var len =_title.length - getLength(_title)/2 ;
-		return len * fontWidth + pointMargin ;
+		var titleW = len * fontWidth + pointMargin ;
+		var deepW = deeplog.length*smallFontsize ;
+		//console.log(deepW)
+		var max = titleW - deepW > 0 ? titleW : deepW ;
+		//console.log("max:",max , "deepW:",deepW, "titleW:",titleW )
+		return max ;
 	}
 
 	function sortDatas(data, id) {
