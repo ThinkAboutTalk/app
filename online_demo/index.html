@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>demo</title>
-		<link type="text/css" rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css"  />
+		<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
 		<link type="text/css" rel="stylesheet" href="css/prism.css"  />
 	</head>
 	<body ng-controller="demoCtrl">
@@ -29,10 +29,36 @@
 					</button>
 	    		</div>
 	    	</div>
-	    	<hr />
-	    	<div class="row">
+	    	<!--<hr />
+	    	<div class="row" ng-show="">
 	    		<div class="col-md-12">
 	    			<textarea class="form-control" rows="5" ng-model="modelData" placeholder="//仅支持输入JSON格式数据"></textarea>
+	    		</div>
+	    	</div>-->
+	    	<hr />
+	    	<div class="row" ng-if="parseModelData">
+	    		<div class="col-md-12">
+	    			<div class="table-responsive">
+					  	<table class="table"  ng-repeat="table in parseModelData">
+					    	<thead>
+					          	<tr>
+						            <th ng-repeat="(name,v) in table[0]">{{name}}</th>
+					          	</tr>
+					        </thead>
+					        <tbody>
+						        <tr ng-repeat="content in table">
+						            <td ng-repeat="(name,v) in content">
+						            	<span
+						            		ng-if="name!='unitID'"
+						            		>{{v}}</span>
+						            	<a  ng-if="name=='unitID'"
+						            		href="#" 
+						            		ng-click="formUnitidClick($event)">{{v}}</a>
+						            </td>
+						        </tr>
+						    </tbody>
+					  	</table>
+					</div>
 	    		</div>
 	    	</div>
 	    	<hr />
@@ -40,8 +66,8 @@
 	    		<div class="col-md-12">
 		    		<div class="dropdown">
 						<button class="btn btn-default dropdown-toggle" type="button"  id="dropdownMenu1"   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						  	 段落 {{checkedIndex}}
-						  	 
+						  	段落 {{checkedIndex}}
+						  	
 						    <span class="caret"></span>
 						</button>
 						<ul ng-click="checkAnalysis($event)" class="dropdown-menu"  role="menu"  aria-labelledby="dropdownMenu1">
@@ -82,6 +108,9 @@
 		
 			var module = angular.module("drawwordsModule",[]);
 			module.controller("demoCtrl",["$scope","$http",function($scope,$http){
+				
+				
+				
 				$http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
 				$scope.analysiswords = "" ;
 				$scope.ajaxAnalysis = function (){
@@ -117,7 +146,7 @@
 					parentObj : document.getElementById("wrodsstart"),  // canvas的父级（两者宽度必须相等）
 					jsonData : [] , // 绘图的json
 					openTag : function(unitID){   // 点击事件会获得当前tag的unitID , 随后ajax获取详情
-						showTagDetail(unitID + "\n")
+						showTagDetail(unitID)
 					}
 				}
 				
@@ -136,6 +165,17 @@
 						
 					}
 				})
+				
+				
+				// 表格uid点击事件
+				$scope.formUnitidClick = function(e){
+					var id = e.target.innerHTML ;
+					showTagDetail(id);
+					e.stopPropagation();
+					e.preventDefault();
+					return false;
+				}
+				
 				
 				// 词语详情展示
 				function showTagDetail(output){
