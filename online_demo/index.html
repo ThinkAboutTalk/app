@@ -41,7 +41,9 @@
 	    	<div class="row" ng-if="parseModelData">
 	    		<div class="col-md-12">
 	    			<div class="table-responsive">
-					  	<table class="table table-bordered"  ng-repeat="table in parseModelData">
+					  	<table class="table table-bordered"  ng-repeat="table in parseModelData"
+					  		ng-show="$index==checkedIndex-1"
+					  		>
 					    	<thead>
 					          	<tr>
 					          		<!--["idNo","MaskID","idNo_1","expression","FH","Son","ES","YS","DP","DeepSon","log","DeepLog","POS","UnitID"];
@@ -63,7 +65,7 @@
 					          	</tr>
 					        </thead>
 					        <tbody>
-						        <tr ng-repeat="content in table">
+						        <tr ng-repeat="content in table.datas">
 						            <!--<td ng-repeat="(name,v) in content">
 						            	<span
 						            		ng-if="name!='unitID'"
@@ -100,13 +102,13 @@
 	    		<div class="col-md-12">
 		    		<div class="dropdown">
 						<button class="btn btn-default dropdown-toggle" type="button"  id="dropdownMenu1"   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						  	段落 {{checkedIndex}}
+						  	{{parseModelData[checkedIndex-1].sentence}}
 						  	
 						    <span class="caret"></span>
 						</button>
 						<ul ng-click="checkAnalysis($event)" class="dropdown-menu"  role="menu"  aria-labelledby="dropdownMenu1">
 							<li ng-repeat="list in parseModelData track by $index " role="presentation">
-								<a  role="menuitem" data-index="{{$index}}" href="#">段落{{$index+1}}</a>
+								<a  role="menuitem" data-index="{{$index}}" href="#">{{list.sentence}}</a>
 							</li>
 						</ul>
 					</div>
@@ -170,7 +172,7 @@
 						$scope.checkedIndex = Number(event.target.getAttribute("data-index"))+1;
 						//替换当前对应的json
 						angular.extend(opt,{jsonData:
-							$scope.parseModelData[$scope.checkedIndex-1]
+							$scope.parseModelData[$scope.checkedIndex-1].datas
 						})
 						//执行绘图
 						drawWords(opt);
@@ -198,8 +200,9 @@
 					if(newV){
 						
 						$scope.parseModelData = JSON.parse(newV)
+						$scope.checkedIndex = 1;
 						// 设置
-						angular.extend(opt,{jsonData:$scope.parseModelData[0]});
+						angular.extend(opt,{jsonData:$scope.parseModelData[0].datas});
 						//使用绘图
 						drawWords(opt);
 						
